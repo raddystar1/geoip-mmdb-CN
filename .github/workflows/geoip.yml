@@ -1,0 +1,35 @@
+name: GeoLite2 Country
+
+on:
+  schedule:
+    - cron: "0 3 * * 3"      # 每周三 03:00 UTC 跑一次（远低于 30 次/天限制）
+  workflow_dispatch:          # 支持手动点按钮触发
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download GeoLite2-Country
+        env:
+          LICENSE_KEY: ${{ secrets.MAXMIND_LICENSE_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 \
+            "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=${LICENSE_KEY}&suffix=tar.gz" \
+            -o geolite2.tar.gz
+          tar -xzf geolite2.tar.gz
+          cp GeoLite2-Country_*/GeoLite2-Country.mmdb ./Country.mmdb
+          ls -lh Country.mmdb
+          test $(stat -c%s Country.mmdb) -gt 100000   # 小于 100KB 说明下错了，直接失败
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh release view geoip --repo "$REPO" >/dev/null 2>&1 \
+            || gh release create geoip --repo "$REPO" --title "GeoLite2 Country" --notes "automated"
+          gh release upload geoip Country.mmdb --clobber --repo "$REPO"
