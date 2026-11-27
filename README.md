@@ -7,7 +7,7 @@ MaxMind 官方只提供 `.tar.gz` 压缩包，多数客户端（如 Quantumult X
 ## 订阅地址
 
 ```
-https://github.com/USER/REPO/releases/download/geoip/Country.mmdb
+https://github.com/raddystar1/geoip-mmdb-CN/releases/download/geoip/Country.mmdb
 ```
 
 > 把 `USER/REPO` 换成你的用户名和仓库名。该地址固定不变，每次更新会覆盖同名附件。
